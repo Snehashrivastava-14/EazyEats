@@ -1,0 +1,41 @@
+/* Hero-specific styles that are complex to replicate with just Tailwind */
+.hero-bg {
+  @apply absolute inset-0 pointer-events-none z-0;
+  background: radial-gradient(1200px 600px at 20% 30%, rgba(255,183,3,0.10), transparent),
+              radial-gradient(800px 400px at 80% 60%, rgba(14,165,164,0.08), transparent);
+}
+
+.hero {
+  @apply relative min-h-[60vh] grid grid-cols-[1.1fr_0.9fr] items-center max-w-7xl mx-auto py-8 px-5 gap-6;
+}
+
+.hero > * {
+  @apply relative z-10;
+}
+
+/* Art block styles */
+.hero .art {
+  @apply bg-cover bg-right h-full rounded-none shadow-none;
+  background-image: url('/l5.jpeg');
+}
+
+/* Full-width hero variant */
+.hero.full-width {
+  @apply max-w-full m-0 px-0 h-[calc(100vh-64px)] w-full grid grid-cols-[1fr_480px] items-center;
+}
+
+.hero.full-width > div:nth-child(2) {
+  @apply pl-14;
+}
+
+.hero.full-width .hero-bg {
+  @apply h-full bg-cover bg-center filter-none pointer-events-none;
+  background-image: linear-gradient(rgba(0,0,0,0.36), rgba(0,0,0,0.26));
+}
+
+/* Auth specific styles */
+.auth-wrap {
+  @apply min-h-[calc(100vh-60px)] bg-cover bg-center grid place-items-center p-6;
+  background-image: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.6)), 
+                    url('/l5.jpeg');
+}
