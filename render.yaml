@@ -1,0 +1,27 @@
+# Render service manifest for EazyEats
+# - Frontend: static site (Vite build output)
+# - Backend: Node web service
+# NOTE: Do NOT store secrets here. Configure environment variables in the Render dashboard.
+
+services:
+  - type: static
+    name: eazyeats-frontend
+    env: static
+    branch: main
+    # Build the frontend from the monorepo root
+    buildCommand: npm ci --prefix frontend && npm run build --prefix frontend
+    publishPath: frontend/dist
+
+  - type: web
+    name: eazyeats-backend
+    env: node
+    branch: main
+    # Install backend deps during build; start the backend on deploy
+    buildCommand: npm ci --prefix backend
+    startCommand: npm start --prefix backend
+    # Uncomment and set a plan if needed (free, starter, professional)
+    # plan: free
+
+# Optional: you can add health checks, routes, and other advanced options per service
+# For env vars, set them in the Render dashboard (Project → Environment). 
+# Required runtime env vars for backend (example): MONGO_URI, JWT_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, CLOUDINARY_*
