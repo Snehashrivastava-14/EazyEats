@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "test-mongo": "node test-mongo.js",
     "build": "echo \"No build step for backend\"",
     "test": "echo \"No tests yet\" && exit 0"
   },
