@@ -71,6 +71,12 @@ app.use(cookieParser())
 // Health
 app.get('/health', (req, res) => res.json({ ok: true }))
 
+// Minimal convenience: redirect root to the frontend origin (set in env)
+app.get('/', (req, res) => {
+  const frontend = process.env.FRONTEND_ORIGIN || 'https://your-frontend-url.example'
+  return res.redirect(frontend)
+})
+
 // Routes
 app.use('/auth', authRoutes)
 app.use('/menu', menuRoutes)

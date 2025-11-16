@@ -3,26 +3,8 @@ import mongoose from 'mongoose'
 export async function connectDB() {
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/eazyeats'
   mongoose.set('strictQuery', true)
-  // Connection options with sane defaults + short server selection timeout for faster failures
-  const opts = {
-    serverSelectionTimeoutMS: 10000,
-  }
-
-  // DEBUG: allow invalid TLS certs when set (debug only — do NOT enable in production)
-  if (process.env.DEBUG_ALLOW_INVALID_TLS === 'true') {
-    console.warn('DEBUG_ALLOW_INVALID_TLS=true — relaxing TLS certificate validation (debug only)')
-    opts.tls = true
-    opts.tlsAllowInvalidCertificates = true
-    opts.tlsAllowInvalidHostnames = true
-  }
-
-  try {
-    await mongoose.connect(uri, opts)
-    console.log('MongoDB connected')
-  } catch (err) {
-    console.error('MongoDB connection error:', err)
-    throw err
-  }
+  await mongoose.connect(uri)
+  console.log('MongoDB connected')
 
   // Development helper: drop stale username index that may have been left behind
   // This prevents E11000 duplicate key errors on `username: null` when the schema
