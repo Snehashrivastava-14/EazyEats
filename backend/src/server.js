@@ -72,9 +72,19 @@ app.use(cookieParser())
 // Health
 app.get('/health', (req, res) => res.json({ ok: true }))
 
+// Public config endpoint: returns cafeteria scheduling settings the frontend can use
+app.get('/config', (req, res) => {
+  const cfg = {
+    cafeteriaOpenHour: Number(process.env.CAFETERIA_OPEN_HOUR || 9),
+    cafeteriaCloseHour: Number(process.env.CAFETERIA_CLOSE_HOUR || 18),
+    cafeteriaTimeZone: process.env.CAFETERIA_TIMEZONE || null
+  }
+  res.json(cfg)
+})
+
 // Minimal convenience: redirect root to the frontend origin (set in env)
 app.get('/', (req, res) => {
-  const frontend = process.env.FRONTEND_ORIGIN || 'https://your-frontend-url.example'
+  const frontend = process.env.FRONTEND_ORIGIN || 'https://localhost:5173'
   return res.redirect(frontend)
 })
 
