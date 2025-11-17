@@ -73,7 +73,7 @@ function Nav() {
               <>
                 <Link to="/login?role=user" className="bg-brand text-black px-4 py-2 rounded-lg font-semibold">Login as user</Link>
                 <Link to="/login?role=staff" className="bg-brand text-black px-4 py-2 rounded-lg font-semibold">Login as staff</Link>
-                <Link to="/register" className="bg-brand text-black px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
+                 <Link to="/register" className="bg-brand text-black px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
               </>
             )}
           </div>

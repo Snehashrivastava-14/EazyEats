@@ -1,5 +1,5 @@
 import { useCart } from '../context/CartContext.jsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApi } from '../api/client.js';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,9 +22,45 @@ export default function Cart() {
   const [loading, setLoading] = useState(false);
   const api = useApi();
   const navigate = useNavigate();
-  const CAF_OPEN = '9'
-  const CAF_CLOSE =  '18'
-  const CAF_TZ = ''
+  const [config, setConfig] = useState(null)
+  const [minPickup, setMinPickup] = useState('')
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await api.get('/config')
+        if (!mounted) return
+        setConfig(res.data)
+        const tz = res.data?.cafeteriaTimeZone || null
+        // compute current time in cafeteria timezone formatted for datetime-local
+        const now = new Date()
+        if (tz) {
+          try {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz
+            }).formatToParts(now).reduce((acc, p) => { acc[p.type] = p.value; return acc }, {})
+            const year = parts.year
+            const month = parts.month
+            const day = parts.day
+            const hour = parts.hour
+            const minute = parts.minute
+            // ensure seconds floored to minute
+            setMinPickup(`${year}-${month}-${day}T${hour}:${minute}`)
+          } catch (e) {
+            setMinPickup(new Date().toISOString().slice(0,16))
+          }
+        } else {
+          setMinPickup(new Date().toISOString().slice(0,16))
+        }
+      } catch (err) {
+        // ignore, fallback to local time
+        setMinPickup(new Date().toISOString().slice(0,16))
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   return (
     <div className="max-w-[700px] mx-auto my-10 bg-surface rounded-2xl shadow-lg p-8">
@@ -109,13 +145,13 @@ export default function Cart() {
                 <div className="mb-5">
                   <label className="block mb-2 text-muted">Pickup Time*</label>
                   <div className="text-sm text-white/70 mb-2">
-                    Cafeteria hours: {String(CAF_OPEN).padStart(2, '0')}:00 — {String(CAF_CLOSE).padStart(2, '0')}:00 {CAF_TZ ? `(${CAF_TZ})` : '(server local time)'}
+                    Cafeteria hours: {String(config?.cafeteriaOpenHour ?? 9).padStart(2, '0')}:00 — {String(config?.cafeteriaCloseHour ?? 18).padStart(2, '0')}:00 {config?.cafeteriaTimeZone ? `(${config.cafeteriaTimeZone})`:""}
                   </div>
                   <input
                     type="datetime-local"
                     value={pickupTime}
                     onChange={(e) => setPickupTime(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={minPickup || new Date().toISOString().slice(0, 16)}
                     className="w-full px-3 py-2.5 border border-gray-600/20 rounded-lg text-base bg-surface"
                     required
                   />

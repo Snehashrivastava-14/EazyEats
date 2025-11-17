@@ -48,17 +48,7 @@ export default function Register() {
       <div className="auth-card">
         <h2 className="text-3xl font-bold mb-2">Create your account</h2>
         
-        {/* Debug info - remove after testing */}
-        <div className="mb-3 p-2 bg-yellow-100 text-sm">
-          <div>URL Role Param: {roleParam || 'none'}</div>
-          <div>Is Staff Registration: {isStaffRegistration ? 'YES' : 'NO'}</div>
-        </div>
-        
-        {isStaffRegistration && (
-          <p className="text-sm text-gray-600 mb-5">
-            Registering as <span className="font-semibold text-red-600">Staff Member</span>
-          </p>
-        )}
+       
         <form onSubmit={onSubmit} className="space-y">
           {isStaffRegistration && (
             <div>

@@ -246,8 +246,8 @@ export default function StaffMenu() {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: 10 }}>
-                        <label style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        <label style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontSize: 13, color: '#374151', fontWeight: 600, marginBottom: 6 }}>Name</span>
                           <input 
                             placeholder="Item name" 
@@ -257,7 +257,7 @@ export default function StaffMenu() {
                             style={{ padding: '9px 12px', borderRadius: 6, border: '1px solid #d1d5db', background: '#ffff', color: '#000', fontSize: 14 }}
                           />
                         </label>
-                        <label style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <label style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontSize: 13, color: '#374151', fontWeight: 600, marginBottom: 6 }}>Price</span>
                           <input 
                             placeholder="Price" 
@@ -282,8 +282,8 @@ export default function StaffMenu() {
                         />
                       </label>
 
-                      <div style={{ display: 'flex', gap: 10 }}>
-                        <label style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        <label style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontSize: 13, color: '#374151', fontWeight: 600, marginBottom: 6 }}>Category</span>
                           <input 
                             placeholder="e.g., Appetizer, Main" 
