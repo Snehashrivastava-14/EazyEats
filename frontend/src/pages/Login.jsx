@@ -47,16 +47,11 @@ export default function Login() {
         <h2 className="text-3xl font-bold mb-2">Login to EazyEats</h2>
         
         {/* Debug info */}
-        <div className="mb-3 p-2 bg-yellow-100 text-sm">
-          <div>Role Param: {roleParam || 'none'}</div>
-          <div>Signup Link: /register{roleParam ? `?role=${roleParam}` : ''}</div>
-        </div>
         
-        {roleParam && (
-          <p className="text-sm text-gray-600 mb-5">
-            Logging in as <span className="font-semibold text-red-600">{roleParam === 'staff' ? 'Staff Member' : 'User'}</span>
-          </p>
-        )}
+        
+        
+     
+     
         <form onSubmit={onSubmit} className="space-y">
           <div>
             <label className="text-md md:text-md text-black mb-8 max-w-xl">Email:</label>
