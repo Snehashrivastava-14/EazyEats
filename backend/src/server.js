@@ -14,6 +14,7 @@ import ordersRoutes from './routes/orders.routes.js'
 import adminRoutes from './routes/admin.routes.js'
 import uploadRoutes from './routes/upload.routes.js'
 import paymentsRoutes from './routes/payments.routes.js'
+import cartRoutes from './routes/cart.routes.js'
 
 dotenv.config()
 
@@ -84,6 +85,7 @@ app.use('/orders', ordersRoutes)
 app.use('/admin', adminRoutes)
 app.use('/upload', uploadRoutes)
 app.use('/payments', paymentsRoutes)
+app.use('/cart', cartRoutes)
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Not found' }))

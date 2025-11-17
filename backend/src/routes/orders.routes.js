@@ -36,8 +36,21 @@ router.post(
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
 
     const scheduledPickupAt = new Date(req.body.scheduledPickupAt)
-    if (scheduledPickupAt < new Date()) return res.status(400).json({ error: 'Pickup time in the past' })
-    if (!isWithinHours(scheduledPickupAt)) return res.status(400).json({ error: 'Outside cafeteria hours' })
+      const now = new Date()
+      if (scheduledPickupAt < now) return res.status(400).json({ error: 'Pickup time in the past', message: 'Pickup time must be in the future.' })
+
+      // Provide helpful timezone-aware messages when outside hours
+      const CAF_OPEN = Number(process.env.CAFETERIA_OPEN_HOUR || 9)
+      const CAF_CLOSE = Number(process.env.CAFETERIA_CLOSE_HOUR || 18)
+      const CAF_TZ = process.env.CAFETERIA_TIMEZONE || null
+      if (!isWithinHours(scheduledPickupAt)) {
+        const fmt = (h) => `${String(h).padStart(2, '0')}:00`
+        const tzLabel = CAF_TZ ? `${CAF_TZ}` : 'server local time'
+        return res.status(400).json({
+          error: 'Outside cafeteria hours',
+          message: `Cafeteria accepts pickups between ${fmt(CAF_OPEN)} and ${fmt(CAF_CLOSE)} (${tzLabel}). Please pick a time within these hours.`
+        })
+      }
     if (!canSchedule(scheduledPickupAt)) return res.status(429).json({ error: 'Time slot at capacity' })
 
     const activeMenu = await Menu.findOne({ isActive: true })
