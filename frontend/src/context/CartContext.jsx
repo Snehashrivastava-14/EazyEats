@@ -1,15 +1,28 @@
 import { createContext, useContext, useState } from 'react';
+import { toast } from 'sonner';
+import { useApi } from '../api/client.js';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]); // [{item, qty}]
+  const api = useApi()
 
-  function addToCart(item, qty = 1) {
+  async function addToCart(item, qty = 1) {
+    // Validate with backend (returns 401 when not authenticated)
+    try {
+      await api.post('/cart', { itemId: item._id, qty })
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.error || 'Please login to continue.'
+      toast.error(message)
+      // Do not add to local cart when validation fails
+      throw err
+    }
+
+    // Only add locally when backend validation passes
     setCart((prev) => {
       const idx = prev.findIndex((x) => x.item._id === item._id);
       if (idx !== -1) {
-        // Already in cart, update qty
         const updated = [...prev];
         updated[idx].qty += qty;
         return updated;

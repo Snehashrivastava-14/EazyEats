@@ -39,31 +39,31 @@ export default function MenuPage() {
         {!menu ? (
           <div className="text-center mt-10 text-white/70">Loading menu...</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((it) => (
               <div 
                 key={it._id} 
-                className="bg-black rounded-xl overflow-hidden shadow-[0_6px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_25px_rgba(255,255,255,0.3)] transition-all duration-300 transform hover:-translate-y-1"
+                className="bg-black rounded-lg overflow-hidden shadow-[0_6px_20px_rgba(255,255,255,0.12)] hover:shadow-[0_6px_18px_rgba(255,255,255,0.16)] transition-all duration-250 transform hover:-translate-y-0.5"
               >
-                <div className="h-64 overflow-hidden">
+                <div className="h-48 overflow-hidden">
                   <img
                     src={it.imageUrl || 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop'}
                     alt={it.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl mb-3 text-white">{it.name}</h3>
-                  <div className="text-red-500 font-bold text-xl mb-4">₹{Number(it.price).toFixed(2)}</div>
+                <div className="p-4">
+                  <h3 className="text-lg mb-2 text-white font-semibold">{it.name}</h3>
+                  <div className="text-red-500 font-bold text-lg mb-3">₹{Number(it.price).toFixed(2)}</div>
                   <div className="flex items-center gap-3">
                     <button
-                      className="bg-[#ffc107] hover:bg-[#ffb300] text-black rounded-lg py-3 px-4 font-bold text-base transition-colors"
+                      className="bg-[#ffc107] hover:bg-[#ffb300] text-black rounded-md py-2 px-3 font-semibold text-sm transition-colors"
                       onClick={() => navigate(`/menu/${it._id}`, { state: { item: it } })}
                     >
                       View Details
                     </button>
                     {!it.isAvailable && (
-                      <span className="bg-red-500/20 text-red-500 font-semibold text-sm px-3 py-1.5 rounded-md border border-red-500/30">
+                      <span className="bg-red-500/20 text-red-500 font-semibold text-sm px-2 py-1 rounded-md border border-red-500/30">
                         Unavailable
                       </span>
                     )}

@@ -7,6 +7,9 @@
 @layer base {
   body {
     @apply bg-bg text-text min-h-screen min-w-[320px] flex flex-col;
+    /* Make base font smaller so rem-based sizes scale down in production */
+    font-size: 14px;
+    line-height: 1.45;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -20,7 +23,8 @@
 
 @layer components {
   .btn {
-    @apply bg-brand text-black px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-brand-dark transition-colors;
+    /* slightly smaller button defaults */
+    @apply bg-brand text-black px-3 py-1.5 rounded-lg font-semibold shadow-md hover:bg-brand-dark transition-colors text-sm;
   }
 
   .btn-outline {
@@ -82,7 +86,7 @@
   }
 
   .staff-value {
-    font-size: 2.2rem; /* default large value */
+    font-size: 1.8rem; /* reduced for more compact layout */
   }
 
   .staff-icon {
@@ -164,22 +168,22 @@
   .card {
     background: var(--card-bg, #0b1220);
     border: 1px solid rgba(15,23,42,0.05);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 10px 15px rgba(2,6,23,0.06);
+    box-shadow: 0 8px 12px rgba(2,6,23,0.06);
   }
 
   /* Standard card image (menu cards use shared grid/layout) */
   .card-image {
     width: 100%;
-    height: 180px;
+    height: 150px;
     background-size: cover;
     background-position: center;
     display: block;
   }
 
   .card-body {
-    padding: 0.875rem; /* ~p-3.5 */
+    padding: 0.75rem; /* slightly reduced padding */
   }
 
   .card-title {
@@ -253,7 +257,7 @@
     max-width: 680px; /* increased width */
     background: #f7f7f7;
     border-radius: 14px;
-    padding: 44px; /* increased padding */
+    padding: 28px; /* reduced padding for more compact layout */
     box-shadow: 0 6px 40px rgba(0,0,0,0.5);
     color: #111;
   }

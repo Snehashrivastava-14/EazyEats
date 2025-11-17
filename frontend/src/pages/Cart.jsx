@@ -22,6 +22,9 @@ export default function Cart() {
   const [loading, setLoading] = useState(false);
   const api = useApi();
   const navigate = useNavigate();
+  const CAF_OPEN = '9'
+  const CAF_CLOSE =  '18'
+  const CAF_TZ = ''
 
   return (
     <div className="max-w-[700px] mx-auto my-10 bg-surface rounded-2xl shadow-lg p-8">
@@ -99,12 +102,15 @@ export default function Cart() {
                   
                   navigate('/orders');
                 } catch (err) {
-                  setError(err.response?.data?.error || 'Failed to create order');
+                  setError(err.response?.data?.message || err.response?.data?.error || 'Failed to create order');
                   setLoading(false);
                 }
               }}>
                 <div className="mb-5">
                   <label className="block mb-2 text-muted">Pickup Time*</label>
+                  <div className="text-sm text-white/70 mb-2">
+                    Cafeteria hours: {String(CAF_OPEN).padStart(2, '0')}:00 — {String(CAF_CLOSE).padStart(2, '0')}:00 {CAF_TZ ? `(${CAF_TZ})` : '(server local time)'}
+                  </div>
                   <input
                     type="datetime-local"
                     value={pickupTime}

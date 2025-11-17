@@ -17,7 +17,7 @@ export default function Home() {
         
         {/* Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-2xl ml-[-180px] mt-[-100px]">
+          <div className="max-w-2xl  mt-[-100px]">
             <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#ffb703' }}>
               Welcome to EazyEats
             </h1>

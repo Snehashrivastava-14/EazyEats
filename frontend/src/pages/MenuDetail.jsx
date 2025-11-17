@@ -16,10 +16,16 @@ export default function MenuDetail({ item }) {
       toast.error('This item is currently unavailable');
       return;
     }
-    addToCart(item, 1);
-    setAdded(true);
-    toast.success('Added to cart successfully!');
-    setTimeout(() => setAdded(false), 1200);
+    (async () => {
+      try {
+        await addToCart(item, 1)
+        setAdded(true);
+        toast.success('Added to cart successfully!');
+        setTimeout(() => setAdded(false), 1200);
+      } catch (err) {
+        // addToCart already showed a toast on auth error; nothing else to do
+      }
+    })()
   }
 
   return (
