@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Link, Navigate, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 
@@ -27,7 +27,18 @@ import StaffNav from './components/StaffNav.jsx'
 
 function Nav() {
   const { user, logout } = useAuth()
+  const [open, setOpen] = useState(false)
+  const [hideBadge, setHideBadge] = useState(false)
   const { count } = useCart();
+  const prevCountRef = useRef(count)
+
+  useEffect(() => {
+    // If the cart count actually changes (e.g. user adds an item), show the badge again
+    if (prevCountRef.current !== count) {
+      setHideBadge(false)
+    }
+    prevCountRef.current = count
+  }, [count])
   return (
     <header className="h-20 sticky top-0 bg-black border-b border-white/10 z-10 py-1">
       <div className="max-w-7xl mx-auto px-5 py-4 flex items-center">
@@ -35,7 +46,11 @@ function Nav() {
           EazyEats
         </Link>
 
-        <div className="ml-auto flex items-center gap-6">
+        <button className="ml-auto sm:hidden text-white/90" onClick={() => setOpen(s => !s)} aria-label="Toggle menu">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+
+        <div className="hidden sm:flex ml-auto items-center gap-6">
           <nav className="flex items-center gap-6">
             {user && (
               <>
@@ -54,9 +69,9 @@ function Nav() {
           </nav>
 
           {user && (
-            <Link to="/cart" className="relative text-lg text-white/80 hover:text-brand transition-colors">
+            <Link to="/cart" onClick={() => setHideBadge(true)} className="relative text-lg text-white/80 hover:text-brand transition-colors">
               Cart
-              {count > 0 && (
+              {!hideBadge && count > 0 && (
                 <span className="absolute -top-2 -right-6 bg-brand text-black rounded-full text-xs font-bold px-2 py-0.5 min-w-[20px] text-center shadow-sm">
                   {count}
                 </span>
@@ -78,6 +93,40 @@ function Nav() {
             )}
           </div>
         </div>
+
+        {open && (
+          <div className="sm:hidden absolute left-0 right-0 top-full bg-black border-t border-white/5 z-20">
+            <div className="px-4 py-3 flex flex-col gap-3">
+              {user && (
+                <>
+                  <Link to="/orders" className="text-white/90" onClick={() => setOpen(false)}>My Orders</Link>
+                  <Link to="/track" className="text-white/90" onClick={() => setOpen(false)}>Track Order</Link>
+                </>
+              )}
+              <Link to="/menu" className="text-white/90" onClick={() => setOpen(false)}>Menu</Link>
+              <Link to="/contact" className="text-white/90" onClick={() => setOpen(false)}>Contact</Link>
+              {user?.role === 'staff' || user?.role === 'admin' ? (
+                <Link to="/staff/payments" className="text-white/90" onClick={() => setOpen(false)}>Payments</Link>
+              ) : null}
+              {user?.role === 'admin' && (
+                <Link to="/admin" className="text-white/90" onClick={() => setOpen(false)}>Admin</Link>
+              )}
+
+              {user ? (
+                <>
+                  <Link to="/cart" className="text-white/90" onClick={() => { setOpen(false); setHideBadge(true); }}>Cart{count > 0 ? ` (${count})` : ''}</Link>
+                  <button className="bg-brand text-black px-3 py-2 rounded-lg font-semibold mt-2" onClick={() => { logout(); setOpen(false); }}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login?role=user" className="text-white/90" onClick={() => setOpen(false)}>Login as user</Link>
+                  <Link to="/login?role=staff" className="text-white/90" onClick={() => setOpen(false)}>Login as staff</Link>
+                  <Link to="/register" className="text-white/90" onClick={() => setOpen(false)}>Sign Up</Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   )
