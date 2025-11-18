@@ -21,8 +21,8 @@ export function CartProvider({ children }) {
       try {
         const res = await api.get('/cart')
         if (!mounted) return
-        // backend returns cart entries { itemId, name, price, imageUrl, qty }
-        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty }))
+        // backend returns cart entries { itemId, name, price, imageUrl, qty, seen }
+        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty, seen: !!c.seen }))
         setCart(normalized)
       } catch (e) {
         // ignore and keep local cart
@@ -37,7 +37,7 @@ export function CartProvider({ children }) {
     try {
       const payload = { itemId: item._id, name: item.name, price: Number(item.price), imageUrl: item.imageUrl || '', qty }
       const res = await api.post('/cart', payload)
-      const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty }))
+      const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty, seen: !!c.seen }))
       setCart(normalized)
     } catch (err) {
       const message = err?.response?.data?.message || err?.response?.data?.error || 'Please login to continue.'
@@ -50,7 +50,7 @@ export function CartProvider({ children }) {
     ;(async () => {
       try {
         const res = await api.delete(`/cart/${itemId}`)
-        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty }))
+        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty, seen: !!c.seen }))
         setCart(normalized)
       } catch (e) {
         // fallback to local update
@@ -66,7 +66,7 @@ export function CartProvider({ children }) {
         if (!item) return
         const payload = { itemId, name: item.item.name, price: Number(item.item.price), imageUrl: item.item.imageUrl || '', qty }
         const res = await api.post('/cart', payload)
-        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty }))
+        const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty, seen: !!c.seen }))
         setCart(normalized)
       } catch (e) {
         // fallback local change
@@ -86,11 +86,23 @@ export function CartProvider({ children }) {
     })()
   }
 
+  // mark all or specific items seen by calling server endpoint
+  async function markSeen(itemIds = []) {
+    try {
+      const res = await api.post('/cart/mark-seen', itemIds && itemIds.length ? { itemIds } : {})
+      const normalized = (res.data.cart || []).map(c => ({ item: { _id: c.itemId, name: c.name, price: c.price, imageUrl: c.imageUrl }, qty: c.qty, seen: !!c.seen }))
+      setCart(normalized)
+    } catch (e) {
+      // ignore
+    }
+  }
+
   const total = cart.reduce((sum, x) => sum + x.item.price * x.qty, 0);
   const count = cart.reduce((sum, x) => sum + x.qty, 0);
+  const unseenCount = cart.reduce((sum, x) => sum + (x.seen ? 0 : x.qty), 0)
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQty, clearCart, total, count }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQty, clearCart, total, count, unseenCount, markSeen }}>
       {children}
     </CartContext.Provider>
   );

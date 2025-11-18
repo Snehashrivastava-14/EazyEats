@@ -29,16 +29,7 @@ function Nav() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const [hideBadge, setHideBadge] = useState(false)
-  const { count } = useCart();
-  const prevCountRef = useRef(count)
-
-  useEffect(() => {
-    // If the cart count actually changes (e.g. user adds an item), show the badge again
-    if (prevCountRef.current !== count) {
-      setHideBadge(false)
-    }
-    prevCountRef.current = count
-  }, [count])
+  const { count, unseenCount, markSeen } = useCart();
   return (
     <header className="h-20 sticky top-0 bg-black border-b border-white/10 z-10 py-1">
       <div className="max-w-7xl mx-auto px-5 py-4 flex items-center">
@@ -69,11 +60,11 @@ function Nav() {
           </nav>
 
           {user && (
-            <Link to="/cart" onClick={() => setHideBadge(true)} className="relative text-lg text-white/80 hover:text-brand transition-colors">
+            <Link to="/cart" onClick={() => { markSeen() }} className="relative text-lg text-white/80 hover:text-brand transition-colors">
               Cart
-              {!hideBadge && count > 0 && (
+              {unseenCount > 0 && (
                 <span className="absolute -top-2 -right-6 bg-brand text-black rounded-full text-xs font-bold px-2 py-0.5 min-w-[20px] text-center shadow-sm">
-                  {count}
+                  {unseenCount}
                 </span>
               )}
             </Link>
@@ -112,9 +103,9 @@ function Nav() {
                 <Link to="/admin" className="text-white/90" onClick={() => setOpen(false)}>Admin</Link>
               )}
 
-              {user ? (
+                  {user ? (
                 <>
-                  <Link to="/cart" className="text-white/90" onClick={() => { setOpen(false); setHideBadge(true); }}>Cart{count > 0 ? ` (${count})` : ''}</Link>
+                  <Link to="/cart" className="text-white/90" onClick={() => { setOpen(false); markSeen(); }}>Cart{unseenCount > 0 ? ` (${unseenCount})` : ''}</Link>
                   <button className="bg-brand text-black px-3 py-2 rounded-lg font-semibold mt-2" onClick={() => { logout(); setOpen(false); }}>Logout</button>
                 </>
               ) : (
