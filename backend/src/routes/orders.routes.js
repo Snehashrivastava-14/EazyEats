@@ -53,7 +53,8 @@ router.post(
       }
     if (!canSchedule(scheduledPickupAt)) return res.status(429).json({ error: 'Time slot at capacity' })
 
-    const activeMenu = await Menu.findOne({ isActive: true })
+    // use the most recent menu document
+    const activeMenu = await Menu.findOne().sort({ createdAt: -1 })
     if (!activeMenu) return res.status(400).json({ error: 'Menu unavailable' })
 
     // Build items and total

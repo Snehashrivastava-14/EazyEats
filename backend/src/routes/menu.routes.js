@@ -5,9 +5,9 @@ import { authRequired, hasRole } from '../middleware/auth.js'
 
 const router = Router()
 
-// Public: list active menu (include review aggregates)
+// Public: list menu (use the most recently created menu since there's no active concept)
 router.get('/', async (req, res) => {
-  const menu = await Menu.findOne({ isActive: true }).lean()
+  const menu = await Menu.findOne().sort({ createdAt: -1 }).lean()
   if (!menu) return res.json({ menu: null })
 
   // compute average rating and review count per item for client display
@@ -21,6 +21,18 @@ router.get('/', async (req, res) => {
   res.json({ menu })
 })
 
+// Public: return count of items in the most recent menu (debugging helper)
+router.get('/count', async (req, res) => {
+  try {
+    const menu = await Menu.findOne().sort({ createdAt: -1 }).select('items').lean()
+    if (!menu) return res.json({ count: 0 })
+    return res.json({ count: (menu.items || []).length })
+  } catch (e) {
+    console.error('GET /menu/count error', e)
+    return res.status(500).json({ error: 'Server error' })
+  }
+})
+
 // Admin: create/replace a menu
 router.post(
   '/',
@@ -30,9 +42,8 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
-    // deactivate existing active menu
-    await Menu.updateMany({ isActive: true }, { $set: { isActive: false } })
-    const menu = await Menu.create({ title: req.body.title, isActive: true, items: [] })
+    // create a new menu document; we no longer track 'active' menus
+    const menu = await Menu.create({ title: req.body.title, items: [] })
     res.status(201).json({ menu })
   }
 )
@@ -48,19 +59,55 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
-    const menu = await Menu.findOne({ isActive: true })
-    if (!menu) return res.status(400).json({ error: 'No active menu' })
-    menu.items.push({
-      name: req.body.name,
-      description: req.body.description || '',
-      price: req.body.price,
-      category: req.body.category || '',
-      isAvailable: req.body.isAvailable ?? true,
-      stock: req.body.stock ?? 0,
-      imageUrl: req.body.imageUrl || ''
-    })
-    await menu.save()
-    res.status(201).json({ menu })
+    try {
+      // operate on the most recent menu; create one if none exists
+      let menu = await Menu.findOne().sort({ createdAt: -1 })
+      if (!menu) {
+        menu = await Menu.create({ title: 'Menu', items: [] })
+      }
+
+      // defensive: ensure items array exists
+      menu.items = menu.items || []
+
+      // push new item
+      menu.items.push({
+        name: req.body.name,
+        description: req.body.description || '',
+        price: req.body.price,
+        category: req.body.category || '',
+        isAvailable: req.body.isAvailable ?? true,
+        stock: req.body.stock ?? 0,
+        imageUrl: req.body.imageUrl || ''
+      })
+
+      await menu.save()
+      return res.status(201).json({ menu })
+    } catch (err) {
+      console.error('Failed to add menu item:', err)
+      // If BSON/document size error, try an automatic fallback: create
+      // a new active menu and add the item there so staff can continue.
+      if (err.message && err.message.match(/BSON|document is larger than|object to be written would/)) {
+        try {
+          console.warn('Menu document too large; creating a new menu to continue adding items.')
+          const payloadItem = {
+            name: req.body.name,
+            description: req.body.description || '',
+            price: req.body.price,
+            category: req.body.category || '',
+            isAvailable: req.body.isAvailable ?? true,
+            stock: req.body.stock ?? 0,
+            imageUrl: req.body.imageUrl || ''
+          }
+          const newTitle = (req.body.menuTitle && String(req.body.menuTitle).trim()) || `Menu (continued ${new Date().toISOString().slice(0,10)})`
+          const newMenu = await Menu.create({ title: newTitle, items: [payloadItem] })
+          return res.status(201).json({ menu: newMenu, warning: 'Created new menu due to menu document size limit' })
+        } catch (e2) {
+          console.error('Failed to create new menu fallback:', e2)
+          return res.status(500).json({ error: 'Menu too large and fallback failed', detail: e2.message })
+        }
+      }
+      return res.status(500).json({ error: 'Failed to add item', detail: err.message })
+    }
   }
 )
 
@@ -71,7 +118,7 @@ router.patch(
   hasRole('staff', 'admin'),
   async (req, res) => {
     const { itemId } = req.params
-    const menu = await Menu.findOne({ 'items._id': itemId, isActive: true })
+    const menu = await Menu.findOne({ 'items._id': itemId })
     if (!menu) return res.status(404).json({ error: 'Item not found' })
     const item = menu.items.id(itemId)
     if ('name' in req.body) item.name = req.body.name
@@ -96,7 +143,7 @@ router.patch(
     const errors = validationResult(req)
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
     const { itemId } = req.params
-    const menu = await Menu.findOne({ 'items._id': itemId, isActive: true })
+    const menu = await Menu.findOne({ 'items._id': itemId })
     if (!menu) return res.status(404).json({ error: 'Item not found' })
     const item = menu.items.id(itemId)
     item.isAvailable = req.body.isAvailable
@@ -112,7 +159,7 @@ router.delete(
   hasRole('staff', 'admin'),
   async (req, res) => {
     const { itemId } = req.params
-    const menu = await Menu.findOne({ 'items._id': itemId, isActive: true })
+    const menu = await Menu.findOne({ 'items._id': itemId })
     if (!menu) return res.status(404).json({ error: 'Item not found' })
     
     // Use $pull to remove the item from the items array
@@ -137,7 +184,7 @@ router.post(
     const errors = validationResult(req)
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
     const { itemId } = req.params
-    const menu = await Menu.findOne({ 'items._id': itemId, isActive: true })
+    const menu = await Menu.findOne({ 'items._id': itemId })
     if (!menu) return res.status(404).json({ error: 'Item not found' })
     const item = menu.items.id(itemId)
     if (!item) return res.status(404).json({ error: 'Item not found' })
