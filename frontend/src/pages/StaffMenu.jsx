@@ -18,7 +18,7 @@ export default function StaffMenu() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState('eazyeats')
   const [item, setItem] = useState({ name: '', price: '', description: '', category: '', imageUrl: '', stock: 0, isAvailable: true })
   const [saving, setSaving] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -47,9 +47,9 @@ export default function StaffMenu() {
     setSaving(true)
     setError('')
     try {
-      const res = await api.post('/menu', { title })
+      const res = await api.post('/menu', { title: 'eazyeats' })
       setMenu(res.data.menu)
-      setTitle('')
+      setTitle('eazyeats')
     } catch (e) {
       setError(e.response?.data?.error || 'Failed to create menu')
     } finally {
@@ -119,13 +119,13 @@ export default function StaffMenu() {
         <>
           {!menu ? (
             <form onSubmit={createActiveMenu} className="form" style={{ marginBottom: 20 }}>
-              <h3>Create Active Menu</h3>
-              <div className="row">
-                <input placeholder="Menu title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <h3>Create Menu</h3>
+              <div className="row" style={{ alignItems: 'center', gap: 12 }}>
+                <div style={{ fontSize: 14 }}>Title: <strong>eazyeats</strong></div>
                 <button className="btn" type="submit" disabled={saving}>Create</button>
               </div>
             </form>
-          ) :(
+          ) : (
 
         
             <>
