@@ -15,7 +15,9 @@ const UserSchema = new mongoose.Schema({
       name: { type: String, required: true },
       price: { type: Number, required: true, min: 0 },
       imageUrl: { type: String, default: '' },
-      qty: { type: Number, default: 1, min: 1 }
+      qty: { type: Number, default: 1, min: 1 },
+      // whether the user has viewed/acknowledged this cart entry in their UI
+      seen: { type: Boolean, default: false }
     }
   ]
 }, { timestamps: true })

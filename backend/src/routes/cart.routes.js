@@ -30,14 +30,42 @@ router.post('/', authRequired, async (req, res) => {
       user.cart[idx].name = name
       user.cart[idx].price = price
       user.cart[idx].imageUrl = imageUrl || user.cart[idx].imageUrl
+      // mark as unseen when quantity is changed or item updated
+      user.cart[idx].seen = false
     } else {
-      user.cart.push({ itemId: String(itemId), name, price, imageUrl: imageUrl || '', qty })
+      user.cart.push({ itemId: String(itemId), name, price, imageUrl: imageUrl || '', qty, seen: false })
     }
 
     await user.save()
     return res.json({ cart: user.cart })
   } catch (e) {
     console.error('POST /cart error', e)
+    return res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Mark items as seen by the user. Body: { itemIds?: string[] }
+// If no itemIds provided, marks all current cart items as seen.
+router.post('/mark-seen', authRequired, async (req, res) => {
+  try {
+    const { itemIds } = req.body || {}
+    const user = await User.findById(req.user.id)
+    if (!user) return res.status(404).json({ error: 'User not found' })
+
+    if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+      // mark all seen
+      user.cart.forEach(c => { c.seen = true })
+    } else {
+      const ids = itemIds.map(String)
+      user.cart.forEach(c => {
+        if (ids.includes(String(c.itemId))) c.seen = true
+      })
+    }
+
+    await user.save()
+    return res.json({ cart: user.cart })
+  } catch (e) {
+    console.error('POST /cart/mark-seen error', e)
     return res.status(500).json({ error: 'Server error' })
   }
 })
