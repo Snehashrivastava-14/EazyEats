@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+
 export default function Contact() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
