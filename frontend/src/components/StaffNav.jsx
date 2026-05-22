@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthProvider.jsx';
 
 export default function StaffNav() {
+  
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false)
 
