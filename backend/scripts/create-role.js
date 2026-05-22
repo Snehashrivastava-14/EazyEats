@@ -13,6 +13,11 @@ function getArg(key, fallback) {
   return argv[idx + 1]
 }
 
+function isSrvLookupFailure(error) {
+  const message = String(error?.message || '')
+  return error?.code === 'ECONNREFUSED' && message.includes('querySrv')
+}
+
 async function main() {
   const email = getArg('email') || process.env.ADMIN_EMAIL
   const name = getArg('name') || 'Admin'
@@ -29,7 +34,18 @@ async function main() {
   }
 
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/eazyeats'
-  await mongoose.connect(uri, { dbName: undefined })
+  const fallbackUri = process.env.MONGO_URI_FALLBACK || 'mongodb://127.0.0.1:27017/eazyeats'
+
+  try {
+    await mongoose.connect(uri, { dbName: undefined })
+  } catch (error) {
+    if (uri !== fallbackUri && isSrvLookupFailure(error)) {
+      console.warn('Primary MongoDB URI could not resolve its Atlas SRV record. Retrying fallback URI...')
+      await mongoose.connect(fallbackUri, { dbName: undefined })
+    } else {
+      throw error
+    }
+  }
 
   // Find user
   let user = await User.findOne({ email })
