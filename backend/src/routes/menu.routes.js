@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator'
 import { Menu } from '../models/Menu.js'
 import { authRequired, hasRole } from '../middleware/auth.js'
 
-const router = Router()
+const router = Router();
 
 // Public: list menu (use the most recently created menu since there's no active concept)
 router.get('/', async (req, res) => {
